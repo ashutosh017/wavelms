@@ -11,9 +11,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
-import { Loader } from "lucide-react";
+import { Loader, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { startTransition, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { FaGithub } from "react-icons/fa";
 import { toast } from "sonner";
 export default function LoginForm() {
@@ -37,7 +37,7 @@ export default function LoginForm() {
       });
     });
   }
-  function handleSigninFunction() {
+  function handleSigninWithEmail() {
     startEmailTransition(async () => {
       await authClient.emailOtp.sendVerificationOtp({
         email,
@@ -45,14 +45,17 @@ export default function LoginForm() {
         fetchOptions: {
           onSuccess: () => {
             toast.success("Email sent");
-            router.push("/verify-request");
+            router.push(`/verify-request?email=${email}`);
+          },
+          onError: () => {
+            toast.error("Error sending email");
           },
         },
       });
     });
   }
   return (
-    <Card>
+    <Card className="mx-2">
       <CardHeader>
         <CardTitle>Welcome Back! </CardTitle>
         <CardDescription> Login with your Github Email Account</CardDescription>
@@ -92,7 +95,19 @@ export default function LoginForm() {
               required
             />
           </div>
-          <Button disabled={isEmailPending}>Continue with Email</Button>
+          <Button onClick={handleSigninWithEmail} disabled={isEmailPending}>
+            {isEmailPending ? (
+              <>
+                <Loader className="size-4 animate-spin" />
+                <span>Loading...</span>
+              </>
+            ) : (
+              <>
+                <Send className="size-4" />
+                <span>Continue with Email</span>
+              </>
+            )}
+          </Button>
         </div>
       </CardContent>
     </Card>
