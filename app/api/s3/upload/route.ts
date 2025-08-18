@@ -5,6 +5,8 @@ import { z } from "zod";
 import { v4 as uuid } from "uuid";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { S3 } from "@/lib/s3-client";
+import arcjet, { detectBot, fixedWindow } from "@/lib/arcjet";
+import { requireAdmin } from "@/app/data/admin/require-admin";
 
 const fileUploadSchema = z.object({
   fileName: z.string().min(1, { message: "File name is required" }),
@@ -12,21 +14,48 @@ const fileUploadSchema = z.object({
   size: z.number().min(1, { message: "Size is required" }),
   isImage: z.boolean(),
 });
-
-export  async function POST(req: NextRequest) {
-  const body = await req.json();
-  const validation = fileUploadSchema.safeParse(body);
-  if (!validation.success) {
-    return NextResponse.json(
-      {
-        error: "Invalid Request Body",
-      },
-      {
-        status: 400,
-      }
-    );
-  }
+const aj = arcjet
+  .withRule(
+    detectBot({
+      mode: "LIVE",
+      allow: [],
+    })
+  )
+  .withRule(
+    fixedWindow({
+      mode: "LIVE",
+      window: "1m",
+      max: 5,
+    })
+  );
+export async function POST(req: NextRequest) {
+  const sesssion = await requireAdmin();
   try {
+    const decision = await aj.protect(req, {
+      fingerprint: sesssion?.user.id as string,
+    });
+    if (decision.isDenied()) {
+      return NextResponse.json(
+        {
+          error: "dudde not good",
+        },
+        {
+          status: 429,
+        }
+      );
+    }
+    const body = await req.json();
+    const validation = fileUploadSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          error: "Invalid Request Body",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
     const { fileName, contentType, size } = validation.data;
     const uniqueKey = `${uuid()}-${fileName}`;
     const command = new PutObjectCommand({
@@ -37,10 +66,10 @@ export  async function POST(req: NextRequest) {
     });
 
     const preSignedUrl = await getSignedUrl(S3, command, {
-      expiresIn: 360,
+      expiresIn: 3600,
     });
     const response = {
-      preSignedUrl:preSignedUrl,
+      preSignedUrl: preSignedUrl,
       key: uniqueKey,
     };
     return NextResponse.json(response);

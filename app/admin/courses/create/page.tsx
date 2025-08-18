@@ -15,7 +15,7 @@ import {
   CourseSchemaType,
   courseStatus,
 } from "@/lib/zod-schema";
-import { ArrowLeft, PlusIcon, SparkleIcon } from "lucide-react";
+import { ArrowLeft, Loader2Icon, PlusIcon, SparkleIcon } from "lucide-react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -37,28 +37,49 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Menubar } from "@/components/rich-text-editor/menubar";
 import RichTextEditor from "@/components/rich-text-editor/editor";
 import Uploader from "@/components/file-uploader/uploader";
+import { useTransition } from "react";
+import { tryCatch } from "@/hooks/try-catch";
+import { CreateCourse } from "./actions";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function CourseCreationPage() {
+  const [isPending, startTransition] = useTransition();
   const form = useForm<CourseSchemaType>({
     resolver: zodResolver(courseSchema),
     defaultValues: {
       title: "",
       description: "",
-      category: "",
-      duration: 0,
-      price: 0,
       fileKey: "",
+      price: 0,
+      duration: 0,
       level: "Beginner",
-      slug: "",
+      category: "",
       smallDescription: "",
+      slug: "",
       status: "Draft",
     },
   });
+  const router = useRouter();
 
   function onSubmit(values: CourseSchemaType) {
+    startTransition(async () => {
+      const { data: result, error } = await tryCatch(CreateCourse(values));
+
+      if (error) {
+        toast.error("An unexpected error occurred. Please try again.");
+        return;
+      }
+      if (result.status === "sucess") {
+        toast.success(result.message);
+        form.reset();
+        router.push("/admin/courses");
+      } else if (result.status === "error") {
+        toast.error(result.message);
+      }
+    });
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     console.log(values);
@@ -106,7 +127,7 @@ export default function CourseCreationPage() {
                   name="slug"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel>Title</FormLabel>
+                      <FormLabel>Slug</FormLabel>
                       <FormControl>
                         <Input placeholder="Slug" {...field} />
                       </FormControl>
@@ -159,8 +180,7 @@ export default function CourseCreationPage() {
                   <FormItem className="w-full">
                     <FormLabel>Thumbnail Image</FormLabel>
                     <FormControl>
-                      <Uploader/>
-                      {/* <Input placeholder="Thumbnail url" {...field} /> */}
+                      <Uploader onChange={field.onChange} value={field.value} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -279,8 +299,17 @@ export default function CourseCreationPage() {
                   </FormItem>
                 )}
               />
-              <Button>
-                Create Course <PlusIcon size={16} className="ml-1" />
+              <Button type="submit">
+                {isPending ? (
+                  <>
+                    Creating...
+                    <Loader2Icon className="animate-spin ml-1" />
+                  </>
+                ) : (
+                  <>
+                    Create Course <PlusIcon size={16} className="ml-1" />
+                  </>
+                )}
               </Button>
             </form>
           </Form>

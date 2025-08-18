@@ -1,8 +1,7 @@
-import "server-only"
 
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { emailOTP } from "better-auth/plugins";
+import { admin, emailOTP } from "better-auth/plugins";
 import { env } from "./env";
 import prisma from "./prisma";
 import { resend } from "./resend";
@@ -19,6 +18,7 @@ export const auth = betterAuth({
     },
   },
   plugins: [
+    admin(),
     emailOTP({
       async sendVerificationOTP({ email, otp, type }) {
         // Implement the sendVerificationOTP method to send the OTP to the user's email address

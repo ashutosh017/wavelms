@@ -26,7 +26,7 @@ export const env = createEnv({
    * The prefix that client-side variables must have. This is enforced both at
    * a type-level and at runtime.
    */
-  clientPrefix: "NEXT_PUBLIC_",
+  clientPrefix: "",
 
   client: {
     // PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),

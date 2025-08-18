@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { CloudUploadIcon, ImageIcon, XIcon } from "lucide-react";
+import { CloudUploadIcon, ImageIcon, Loader2Icon, XIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import Image from "next/image";
 
@@ -42,7 +42,15 @@ export function RenderErrorState() {
   );
 }
 
-export function RenderUploadedState({ previewUrl }: { previewUrl: string }) {
+export function RenderUploadedState({
+  previewUrl,
+  isDeleting,
+  handleRemoveFile,
+}: {
+  previewUrl: string;
+  isDeleting: boolean;
+  handleRemoveFile: () => void;
+}) {
   return (
     <div>
       <Image
@@ -51,8 +59,23 @@ export function RenderUploadedState({ previewUrl }: { previewUrl: string }) {
         fill
         className="object-contain p-2"
       />
-      <Button size={"icon"} variant={"destructive"} type="button">
-        <XIcon size={4} className="absolute top-4 right-4" />
+      <Button
+        size={"icon"}
+        variant={"destructive"}
+        type="button"
+        onClick={handleRemoveFile}
+        disabled={isDeleting}
+        className="absolute top-4 right-4 "
+      >
+        {isDeleting ? (
+          <>
+            <Loader2Icon className="size-4 animate-spin" />
+          </>
+        ) : (
+          <>
+            <XIcon className="size-4 " />
+          </>
+        )}
       </Button>
     </div>
   );
@@ -67,7 +90,7 @@ export function RenderUploadingState({
 }) {
   return (
     <div className="flex items-center justify-center flex-col text-center">
-      <p>{progress}</p>
+      <p>{progress}%</p>
       <p className="mt-2 text-sm font-medium text-foreground"> Uploading...</p>
       <p className="mt-1 text-xs text-muted-foreground truncate max-w-xs">
         {file.name}

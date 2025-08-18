@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const courseLevels = ["Beginner", "Intermediate", "Advanced"];
-export const courseStatus = ["Draft", "Pending", "Archived"];
+export const courseStatus = ["Draft", "Published", "Archived"];
 export const courseCategories = [
   "Development",
   "Business",

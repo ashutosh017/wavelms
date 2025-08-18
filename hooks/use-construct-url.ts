@@ -1,0 +1,11 @@
+
+import { env } from "@/lib/env";
+
+export function useConstructUrl(key: string) {
+//   console.log(
+//     `https://${env.NEXT_PUBLIC_S3_BUCKET_NAME_IMAGES}.t3.storageapi.dev/${key}`
+//   );
+  return `https://${
+    process.env.NEXT_PUBLIC_S3_BUCKET_NAME_IMAGES
+  }.t3.storageapi.dev/${key}`;
+}
