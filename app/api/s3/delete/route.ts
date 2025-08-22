@@ -54,7 +54,7 @@ export async function DELETE(req: NextRequest) {
     await S3.send(command);
     return NextResponse.json(
       {
-        message: "File deleted sucessfully",
+        message: "File deleted successfully",
       },
       {
         status: 200,

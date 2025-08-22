@@ -7,7 +7,6 @@ import prisma from "@/lib/prisma";
 import { ApiResponse } from "@/lib/type";
 import { courseSchema, CourseSchemaType } from "@/lib/zod-schema";
 import { request } from "@arcjet/next";
-import { headers } from "next/headers";
 const aj = arcjet
   .withRule(
     detectBot({
@@ -61,8 +60,8 @@ export async function CreateCourse(
       },
     });
     return {
-      status: "sucess",
-      message: "Course created sucessfully",
+      status: "success",
+      message: "Course created successfully",
     };
   } catch (error) {
     return {

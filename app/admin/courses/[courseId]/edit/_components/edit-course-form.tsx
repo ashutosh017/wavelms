@@ -71,7 +71,7 @@ export default function EditCourseForm({ data }: iAppProps) {
         toast.error("An unexpected error occurred. Please try again.");
         return;
       }
-      if (result.status === "sucess") {
+      if (result.status === "success") {
         toast.success(result.message);
         form.reset();
         router.push("/admin/courses");
@@ -159,7 +159,7 @@ export default function EditCourseForm({ data }: iAppProps) {
               <FormItem className="w-full">
                 <FormLabel>Thumbnail Image</FormLabel>
                 <FormControl>
-                  <Uploader onChange={field.onChange} value={field.value} />
+                  <Uploader fileTypeAccepted="image" onChange={field.onChange} value={field.value} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
